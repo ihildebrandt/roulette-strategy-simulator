@@ -50,7 +50,7 @@ public static class RouletteBoard
     public static Number[] Red => Numbers.Where(n => n.Value.Color == Color.Red).Select(n => n.Value).ToArray();
     public static Number[] Black => Numbers.Where(n => n.Value.Color == Color.Black).Select(n => n.Value).ToArray();
     public static Number[] Even => Numbers.Where(n => n.Key > 0 && n.Key < 100 && n.Key % 2 == 0).Select(n => n.Value).ToArray();
-    public static Number[] Odd => Numbers.Where(n => n.Key > 0 && n.Key < 100 && n.Key % 1 == 1).Select(n => n.Value).ToArray();
+    public static Number[] Odd => Numbers.Where(n => n.Key > 0 && n.Key < 100 && n.Key % 2 == 1).Select(n => n.Value).ToArray();
     public static Number[] Low => Numbers.Where(n => n.Key is > 0 and <= 18).Select(n => n.Value).ToArray();
     public static Number[] High => Numbers.Where(n => n.Key is > 18 and <= 36).Select(n => n.Value).ToArray();
 
