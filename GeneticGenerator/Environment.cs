@@ -3,6 +3,8 @@ using System;
 
 public class Environment : IRandom
 {
+    private const float MutationChance = 0.2f;
+
     private readonly Random _random = new();
 
     public int Next() => _random.Next();
@@ -24,10 +26,17 @@ public class Environment : IRandom
         return new Gene(BitConverter.ToUInt64(bytes));
     }
 
-    public int NextIndividualGeneCount()
-    {
-        return 3;
-    }
+    public int NextIndividualGeneCount() => _random.Next(1, 5);
 
-    public MutationType NextMutation() => MutationType.None;
+    public MutationType NextMutation()
+    {
+        var check = _random.NextSingle();
+        if (check <= MutationChance)
+        {
+            var types = Enum.GetValues(typeof(MutationType));
+            var type = types.GetValue(_random.Next(types.Length));
+            return (MutationType)type!;
+        }
+        return MutationType.None;
+    }
 }

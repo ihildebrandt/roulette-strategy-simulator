@@ -47,14 +47,17 @@ public class Generation : IRunner
         {
             foreach (var individual in Population)
             {
-                individual?.Play(game);
+                if (individual.ShouldPlay())
+                {
+                    individual.Play(game);
+                }
             }
 
             game.Turn();
 
             foreach (var individual in Population)
             {
-                individual?.Resolve();
+                individual.Resolve();
             }
         }
 
@@ -85,36 +88,84 @@ public class Generation : IRunner
 
     private (Individual, Individual) Breed(Individual a, Individual b)
     {
-        var ma = Mutate(a.Genes);
-        var mb = Mutate(b.Genes);
+        var aBytes = a.Genes.SelectMany(g => BitConverter.GetBytes(g.Value)).ToList();
+        var bBytes = a.Genes.SelectMany(g => BitConverter.GetBytes(g.Value)).ToList();
 
-        (var g1, var g2) = CrossOver(ma, mb);
+        var aBytesMut = Mutate(aBytes);
+        var bBytesMut = Mutate(bBytes);
+
+        (var c1Bytes, var c2Bytes) = CrossOver(aBytesMut, bBytesMut);
+
+        static IEnumerable<Gene> convertToGenes(byte[] bytes)
+        {
+            var size = sizeof(ulong);
+            var genes = new List<Gene>();
+
+            var i = 0;
+
+            for (i = 0; i < bytes.Length && bytes.Length - i >= size; i += size)
+            {
+                var geneBytes = new byte[size];
+                Array.Copy(bytes, i, geneBytes, 0, size);
+                genes.Add(new Gene(BitConverter.ToUInt64(geneBytes)));
+            }
+
+            if (i < bytes.Length)
+            {
+                var geneBytes = new byte[size];
+                Array.Copy(bytes, i, geneBytes, 0, bytes.Length - i);
+                genes.Add(new Gene(BitConverter.ToUInt64(geneBytes)));
+            }
+
+            return genes;
+        }
 
         return (
-            new Individual(g1.ToArray()),
-            new Individual(g2.ToArray())
+            new Individual(convertToGenes(c1Bytes.ToArray())),
+            new Individual(convertToGenes(c2Bytes.ToArray()))
         );
     }
 
-    private IList<Gene> Mutate(IList<Gene> oldGenes)
+    private IList<byte> Mutate(IList<byte> oldBytes)
     {
-        var newGenes = new List<Gene>();
+        var newBytes = new List<byte>();
 
-        for (var i = 0; i < oldGenes.Count; i++)
+        for (var i = 0; i < oldBytes.Count; i++)
         {
             switch (_random.NextMutation())
             {
+                case MutationType.Random:
+                    newBytes.Add((byte)_random.Next());
+                    break;
+                case MutationType.Duplicate:
+                    newBytes.Add(oldBytes[i]);
+                    newBytes.Add(oldBytes[i]);
+                    break;
+                case MutationType.Transpose:
+                    if (i < oldBytes.Count - 1)
+                    {
+                        newBytes.Add(oldBytes[i + 1]);
+                    }
+                    newBytes.Add(oldBytes[i]);
+                    i++;
+                    break;
+                case MutationType.Delete:
+                    break;
+                case MutationType.Insert:
+                    newBytes.Add(oldBytes[i]);
+                    newBytes.Add((byte)_random.Next());
+                    break;
                 case MutationType.None:
                 default:
-                    newGenes.Add(oldGenes[i]);
+                    newBytes.Add(oldBytes[i]);
                     break;
             }
         }
 
-        return newGenes;
+        return newBytes;
     }
 
-    private (IList<Gene>, IList<Gene>) CrossOver(IList<Gene> a, IList<Gene> b)
+    private (IList<byte>, IList<byte>) CrossOver(IList<byte> a, IList<byte> b)
     {
         var crossOverPoint = _random.NextCrossOver(a.Count, b.Count);
 

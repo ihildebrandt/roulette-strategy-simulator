@@ -9,27 +9,40 @@ var populationSize = 50;
 var game = new RouletteGame(RouletteBoard.Wheel);
 var generation = new Generation(new GeneticGenerator.Environment(), populationSize, 100);
 
+var maxFitness = 0.0f;
+
 while (true)
 {
+    Console.SetCursorPosition(0, 0);
+    Console.WriteLine($"Generation {generationNumber}");
+
     generation.Run(game);
 
     var fittest = generation.Fittest;
-    Console.WriteLine($"Generation {generationNumber}");
-
-    // TODO: Move to some logging class 
-    foreach (var gene in fittest.Genes)
+    if (fittest.Fitness > maxFitness)
     {
-        var bet = gene.ParseBet();
-        Console.Write($"    ");
-        foreach (var number in bet.Numbers)
+        Console.Clear();
+        Console.SetCursorPosition(0, 0);
+        Console.WriteLine($"Generation {generationNumber}");
+
+        maxFitness = fittest.Fitness;
+        Console.WriteLine($"Generation {generationNumber} ({fittest.Fitness})");
+
+        // TODO: Move to some logging class 
+        foreach (var gene in fittest.Genes)
         {
-            Console.Write($"{number.Name} ");
+            var bet = gene.ParseBet();
+            Console.Write($"    ");
+            foreach (var number in bet.Numbers)
+            {
+                Console.Write($"{number.Name} ");
+            }
+            Console.WriteLine();
         }
-        Console.WriteLine();
     }
 
-    generation.Generate();
+    generation = generation.Generate();
 
-    Debugger.Break();
+    // Debugger.Break();
     generationNumber++;
 }
