@@ -1,5 +1,4 @@
 
-using System.Diagnostics;
 using GeneticGenerator;
 using RouletteStrategySimulator;
 
@@ -27,7 +26,9 @@ while (true)
 
         maxFitness = fittest.Fitness;
         Console.WriteLine($"Generation {generationNumber} ({fittest.Fitness})");
+        Console.WriteLine(fittest);
 
+        /*
         // TODO: Move to some logging class 
         foreach (var gene in fittest.Genes)
         {
@@ -39,6 +40,7 @@ while (true)
             }
             Console.WriteLine();
         }
+        */
     }
 
     generation = generation.Generate();

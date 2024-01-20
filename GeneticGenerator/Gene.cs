@@ -23,6 +23,12 @@ public record Gene(ulong Value)
         }
 
         public bool Resolve(Number number) => _innerBet.Resolve(number);
+
+        public override int GetHashCode() => _innerBet.GetHashCode();
+
+        public override bool Equals(object? obj) => _innerBet.Equals(obj);
+
+        public override string ToString() => _innerBet.ToString()!;
     }
 
 

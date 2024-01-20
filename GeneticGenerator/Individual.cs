@@ -1,6 +1,7 @@
 namespace GeneticGenerator;
 
 using System.Collections.ObjectModel;
+using System.Text;
 using RouletteStrategySimulator;
 
 public class Individual : IStrategy
@@ -46,6 +47,13 @@ public class Individual : IStrategy
 
         var result = _resultTask.Result;
         BuildRound(result);
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine(_genotype.ToString());
+        return sb.ToString();
     }
 
     private void BuildRound()

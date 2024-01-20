@@ -75,13 +75,13 @@ public class Generation : IRunner
         var population = new List<Individual>();
         for (var i = 0; i < popA.Length; i++)
         {
-            var a = popA[i];
-            var b = popB[i];
+            var pa = popA[i];
+            var pb = popB[i];
 
-            (a, b) = Breed(a, b);
+            (var ca, var cb) = Breed(pa, pb);
 
-            population.Add(a);
-            population.Add(b);
+            population.Add(ca);
+            population.Add(cb);
         }
         return new Generation(_random, population.ToArray(), _gameRounds);
     }

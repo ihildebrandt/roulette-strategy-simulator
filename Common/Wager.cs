@@ -21,4 +21,6 @@ public record Wager(IBet Bet, int Amount)
             Payout = 0;
         }
     }
+
+    public override string ToString() => $"Wager {Amount} on {Bet}";
 }
