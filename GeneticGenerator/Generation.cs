@@ -26,7 +26,7 @@ public class Generation : IRunner
                     var genes = Enumerable.Range(0, geneCount)
                         .Select(j => random.NextGene())
                         .ToArray();
-                    return new Individual(genes);
+                    return Individual.Take(genes);
                 })
                 .ToArray());
     }
@@ -91,6 +91,9 @@ public class Generation : IRunner
         var aBytes = a.Genes.SelectMany(g => BitConverter.GetBytes(g.Value)).ToList();
         var bBytes = a.Genes.SelectMany(g => BitConverter.GetBytes(g.Value)).ToList();
 
+        Individual.Give(a);
+        Individual.Give(b);
+
         var aBytesMut = Mutate(aBytes);
         var bBytesMut = Mutate(bBytes);
 
@@ -107,22 +110,22 @@ public class Generation : IRunner
             {
                 var geneBytes = new byte[size];
                 Array.Copy(bytes, i, geneBytes, 0, size);
-                genes.Add(new Gene(BitConverter.ToUInt64(geneBytes)));
+                genes.Add(Gene.Take(BitConverter.ToUInt64(geneBytes)));
             }
 
             if (i < bytes.Length)
             {
                 var geneBytes = new byte[size];
                 Array.Copy(bytes, i, geneBytes, 0, bytes.Length - i);
-                genes.Add(new Gene(BitConverter.ToUInt64(geneBytes)));
+                genes.Add(Gene.Take(BitConverter.ToUInt64(geneBytes)));
             }
 
             return genes;
         }
 
         return (
-            new Individual(convertToGenes(c1Bytes.ToArray())),
-            new Individual(convertToGenes(c2Bytes.ToArray()))
+            Individual.Take(convertToGenes(c1Bytes.ToArray())),
+            Individual.Take(convertToGenes(c2Bytes.ToArray()))
         );
     }
 

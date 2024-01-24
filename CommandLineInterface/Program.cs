@@ -12,35 +12,21 @@ var maxFitness = 0.0f;
 
 while (true)
 {
-    Console.SetCursorPosition(0, 0);
-    Console.WriteLine($"Generation {generationNumber}");
-
     generation.Run(game);
 
     var fittest = generation.Fittest;
     if (fittest.Fitness > maxFitness)
     {
-        Console.Clear();
-        Console.SetCursorPosition(0, 0);
-        Console.WriteLine($"Generation {generationNumber}");
-
         maxFitness = fittest.Fitness;
+        Console.SetCursorPosition(0, Console.CursorTop);
         Console.WriteLine($"Generation {generationNumber} ({fittest.Fitness})");
         Console.WriteLine(fittest);
-
-        /*
-        // TODO: Move to some logging class 
-        foreach (var gene in fittest.Genes)
-        {
-            var bet = gene.ParseBet();
-            Console.Write($"    ");
-            foreach (var number in bet.Numbers)
-            {
-                Console.Write($"{number.Name} ");
-            }
-            Console.WriteLine();
-        }
-        */
+        Console.WriteLine();
+    }
+    else
+    {
+        Console.SetCursorPosition(0, Console.CursorTop);
+        Console.Write($"Generation {generationNumber}");
     }
 
     generation = generation.Generate();

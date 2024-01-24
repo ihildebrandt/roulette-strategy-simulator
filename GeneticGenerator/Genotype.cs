@@ -7,16 +7,13 @@ using RouletteStrategySimulator;
 
 internal class Genotype
 {
-    public ReadOnlyCollection<Gene> Genes => Array.AsReadOnly(_genes);
-
-    private readonly Gene[] _genes;
+    public ReadOnlyCollection<Gene> Genes { get; private set; }
 
     public int StepCount => 1;
 
-    public Genotype(IEnumerable<Gene> genes)
-    {
-        _genes = genes.ToArray();
-    }
+    public Genotype() => Genes = Array.AsReadOnly(Array.Empty<Gene>());
+
+    public void Read(IEnumerable<Gene> genes) => Genes = Array.AsReadOnly(genes.ToArray());
 
     public int GetInitialBankRoll()
     {
@@ -24,7 +21,7 @@ internal class Genotype
     }
 
     public IEnumerable<Wager> GetWagers(int step) =>
-        _genes
+        Genes
             .GroupBy(gene => gene.ParseBet())
             .Select(group => (group.Key, group.Sum(_ => 1)))
             .Select(tuple => new Wager(tuple.Key, tuple.Item2))

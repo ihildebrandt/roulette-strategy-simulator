@@ -6,6 +6,30 @@ using RouletteStrategySimulator;
 
 public class Individual : IStrategy
 {
+    private static Stack<Individual> _individualPool = new();
+
+    public static Individual Take(IEnumerable<Gene> genes)
+    {
+        if (_individualPool.Any())
+        {
+            var individual = _individualPool.Pop();
+            individual.Initialize(genes);
+            return individual;
+        }
+
+        return new Individual(genes);
+    }
+
+    public static void Give(Individual i)
+    {
+        foreach (var gene in i._genotype.Genes)
+        {
+            Gene.Give(gene);
+        }
+
+        _individualPool.Push(i);
+    }
+
     public float Fitness => CalculateFitness();
 
     public StrategyDisposition Disposition { get; } = StrategyDisposition.Active;
@@ -21,7 +45,13 @@ public class Individual : IStrategy
 
     public Individual(IEnumerable<Gene> genes)
     {
-        _genotype = new Genotype(genes);
+        _genotype = new Genotype();
+        Initialize(genes);
+    }
+
+    private void Initialize(IEnumerable<Gene> genes)
+    {
+        _genotype.Read(genes);
         BankRoll = _genotype.GetInitialBankRoll();
         BuildRound();
     }
@@ -109,8 +139,8 @@ public class Individual : IStrategy
         fitness += CalculateMultipleCoverageFitness(wagers);
         fitness += CalculateTotalBetHighPayoutRatio(wagers);
         fitness += CalculateTotalBetLowPayoutRatio(wagers);
+        fitness += CalculateHighestPossiblePayout(wagers);
 
-        // TODO: Determine how to baseline
         // fitness += CalculateRoundsToBust(wagers);
         // fitness += CalculateRoundsToRetire(wagers);
 
@@ -180,5 +210,24 @@ public class Individual : IStrategy
         var denominator = betTotal - minPayout;
 
         return (float)numerator / denominator;
+    }
+
+    private static float CalculateHighestPossiblePayout(IEnumerable<Wager> wagers)
+    {
+        var maxPayout = 0;
+        foreach (var number in RouletteBoard.Numbers.Values)
+        {
+            var testPayout = 0;
+            foreach (var wager in wagers)
+            {
+                if (wager.Bet.Resolve(number))
+                {
+                    testPayout += wager.Amount + (wager.Amount * wager.Bet.Odds);
+                }
+            }
+            maxPayout = Math.Max(maxPayout, testPayout);
+        }
+
+        return maxPayout;
     }
 }

@@ -3,8 +3,24 @@ namespace GeneticGenerator;
 using System.Collections.ObjectModel;
 using RouletteStrategySimulator;
 
-public record Gene(ulong Value)
+public class Gene
 {
+    private static Stack<Gene> _genePool = new();
+
+    public static Gene Take(ulong value)
+    {
+        if (_genePool.Any())
+        {
+            var gene = _genePool.Pop();
+            gene.Value = value;
+            return gene;
+        }
+
+        return new Gene(value);
+    }
+
+    public static void Give(Gene gene) => _genePool.Push(gene);
+
     internal class Bet : IBet
     {
         private readonly IBet _innerBet;
@@ -52,6 +68,10 @@ public record Gene(ulong Value)
 
     private ulong BetType => (Value & BetTypeMask) >> BetTypeShift;
     private ulong BetValue => (Value & BetValueMask) >> BetValueShift;
+
+    public ulong Value { get; private set; }
+
+    public Gene(ulong value) => Value = value;
 
     public void Step(WagerDisposition wagerDisposition)
     {
